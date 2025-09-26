@@ -8,18 +8,25 @@ export default function Page() {
     const [photos, setPhotos] = useState<any[]>([])
     const [loading, setLoading] = useState<boolean>(false)
     const [page, setPage] = useState<number>(1)
+    const [isEnd, setIsEnd] = useState(false)
     const tableContainerRef = useRef<HTMLDivElement>(null)
 
     const fetchData = async (page: number) => {
         setLoading(true)
-        const response = await fetch(`/api/photo?page=${page}`)
-        const data = await response.json()
-        setPhotos((prev: string[]) => [...prev, ...data.photos])
-        setLoading(false)
+        try {
+            const response = await fetch(`/api/photo?page=${page}`)
+            const data = await response.json()
+            setPhotos((prev: string[]) => [...prev, ...data.photos])
+            setIsEnd(false)
+        } catch (error) {
+            setIsEnd(true)
+        } finally {
+            setLoading(false)
+        }
     }
 
     const handleScroll = () => {
-        if (loading) return
+        if (loading || isEnd) return
         const container = tableContainerRef.current
         if (!container) return
         if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
